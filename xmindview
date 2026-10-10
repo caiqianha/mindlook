@@ -1,0 +1,4 @@
+#!/bin/sh
+# 包装脚本：xmindview 文件.xmind
+DIR="$(cd "$(dirname "$(readlink "$0" || echo "$0")")" && pwd)"
+exec python3 -I "$DIR/xmindview.py" "$@"
