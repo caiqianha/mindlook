@@ -6,7 +6,7 @@
 
 ![Mindlook 截图](docs/screenshot.png)
 
-在线试用：**https://<你的GitHub用户名>.github.io/mindlook/**（仓库自带 `samples/sample.xmind` 可以拿来试）
+在线试用：**https://caiqianha.github.io/mindlook/**（仓库自带 `samples/sample.xmind` 可以拿来试）
 
 ## 特点
 
