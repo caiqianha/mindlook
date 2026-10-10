@@ -14,6 +14,7 @@
 - **两种格式**：XMind 2020+（content.json）和 XMind 8（content.xml）
 - **结构类型**：思维导图、逻辑图、树形图、组织结构图、时间轴，按文件里每个节点自己的结构设置来排布
 - **完整展示**：多画布、富文本备注（加粗、列表、链接、图片）、标签、超链接、图片、标记、浮动主题、关系线、外框、概要
+- **密码保护文件**：输入密码后在浏览器里本地解密（WebCrypto），XMind 8 和 2020+ 两种加密格式都支持
 - **阅读工具**：搜索（⌘K）、按层级展开、双击聚焦某一分支、方向键在节点间移动、大纲视图
 - **导出**：Markdown（复制或下载）、PNG、SVG
 - **界面**：浅色 / 深色跟随系统，中英文，手机上也能用，首次使用有操作提示，按 `?` 看快捷键
@@ -62,7 +63,7 @@ xmindview -o 输出.html 文件.xmind    # 指定输出位置（可分享给别�
 
 ## 已知限制
 
-- 设置了密码的文件无法打开（需在 XMind 中先解除密码）
+- XMind 3.7 之前的旧加密方式（PKCS12 密钥派生）不支持，需在 XMind 中重新保存
 - 鱼骨图、矩阵按逻辑图/树形图近似显示；标注（callout）暂不显示
 - 不沿用文件里的节点颜色和主题，统一用 Mindlook 配色
 - 不支持编辑
@@ -88,7 +89,7 @@ MIT。Mindlook 与 XMind Ltd. 无关，XMind 是 XMind Ltd. 的商标。
 
 View `.xmind` mind maps without installing XMind. A single HTML file, zero dependencies, parsed entirely in your browser. Nothing is uploaded.
 
-**Features**: both XMind 2020+ and XMind 8 formats · map, logic, tree, org-chart and timeline structures · sheets, rich-text notes, labels, links, images, markers, floating topics, relationships, boundaries, summaries · search (⌘K), expand by level, focus a branch, keyboard navigation, outline view · export Markdown / PNG / SVG · light & dark, Chinese & English, mobile friendly · CLI: `xmindview file.xmind` opens it in your browser.
+**Features**: both XMind 2020+ and XMind 8 formats · map, logic, tree, org-chart and timeline structures · sheets, rich-text notes, labels, links, images, markers, floating topics, relationships, boundaries, summaries · password-protected files decrypted locally with WebCrypto · search (⌘K), expand by level, focus a branch, keyboard navigation, outline view · export Markdown / PNG / SVG · light & dark, Chinese & English, mobile friendly · CLI: `xmindview file.xmind` opens it in your browser.
 
 **Use**: open `index.html` and drop a file in (try `samples/sample.xmind`), or deploy it anywhere static. Installed as a PWA (Chrome / Edge), it works offline and registers as a handler for .xmind files, so double-clicking a file opens it directly. Needs Chrome 103+ / Safari 16.4+ / Firefox 113+.
 

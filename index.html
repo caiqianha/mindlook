@@ -189,6 +189,19 @@ body.dragging #empty .box{border-color:var(--accent);background:var(--soft)}
 #help .x{position:absolute;right:12px;top:12px;width:28px;height:28px;border-radius:7px;color:var(--muted)}
 #help .x:hover{background:var(--soft)}
 #help .foot{margin-top:14px;font-size:12.5px;color:var(--muted)}
+#pw{position:absolute;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:45;cursor:auto;padding:16px}
+#pw.show{display:flex}
+#pw .card{background:var(--panel);border-radius:16px;box-shadow:var(--shadow);width:min(400px,100%);padding:22px 24px}
+#pw h2{margin:0 0 4px;font-size:17px}
+#pw .f{color:var(--muted);font-size:13px;margin:0 0 12px;word-break:break-all}
+#pw .hint{font-size:13px;margin:0 0 10px;padding:8px 10px;background:var(--soft);border-radius:8px}
+#pw input{width:100%;height:38px;border:1px solid var(--line);border-radius:9px;padding:0 12px;font:inherit;background:var(--bg);color:var(--ink)}
+#pw input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+#pw .err{color:var(--c3);font-size:13px;min-height:18px;margin:8px 0 4px}
+#pw .row{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+#pw .row .ib{height:34px;padding:0 14px}
+#pw .row .ghost{border:1px solid var(--line)}
+#pw .priv{font-size:12px;color:var(--muted);margin:12px 0 0}
 
 @media (max-width:760px){
   .bar{gap:6px;padding:0 8px}
@@ -254,6 +267,7 @@ body.dragging #empty .box{border-color:var(--accent);background:var(--soft)}
     </div>
   </div>
   <div id="help"><div class="card"><button class="x" id="helpClose">×</button><h2 id="helpTitle"></h2><table id="helpTable"></table><p class="foot" id="helpFoot"></p></div></div>
+  <div id="pw"><form class="card" id="pwForm"><h2 id="pwTitle"></h2><p class="f" id="pwFile"></p><p class="hint" id="pwHint" hidden></p><input id="pwInput" type="password" autocomplete="off"><div class="err" id="pwErr"></div><div class="row"><button type="button" class="ib ghost" id="pwCancel"></button><button type="submit" class="ib primary" id="pwOk"></button></div><p class="priv" id="pwPriv"></p></form></div>
   <div id="toast"></div>
 </div>
 <input type="file" id="file" accept=".xmind,application/zip,application/octet-stream" hidden>
@@ -283,6 +297,8 @@ const I18N={
   errEnc:'这个文件设置了密码，请先在 XMind 里解除密码再打开。',errNotZip:'这不是 .xmind 文件（无法按 zip 读取）。',errNoContent:'文件里找不到 content.json / content.xml，可能不是 XMind 文件。',
   errOldBrowser:'当前浏览器太旧，不支持解压（需要 Chrome 103+ / Safari 16.4+ / Firefox 113+）。可以改用命令行 xmindview 打开。',errFail:'打开失败：',
   helpTitle:'操作与快捷键',helpFoot:'文件只在本地解析，关闭页面即消失。',
+  pwTitle:'这个文件设置了密码',pwHint:'密码提示：{h}',pwPlaceholder:'输入密码',pwOpen:'打开',pwCancel:'取消',pwWrong:'密码不对，再试一次',pwPriv:'密码和文件都只在你的浏览器里处理，不会发送到任何地方。',pwBusy:'正在解密…',
+  errOldCrypto:'这个文件用的是 XMind 3.7 之前的旧加密方式，请在 XMind 里重新保存后再打开。',errNoCrypto:'当前环境不支持解密：请通过 HTTPS 或本地文件方式打开页面。',errCancelled:'已取消。',
   install:'安装为应用',installHint:'安装成应用后，双击 .xmind 文件就能直接用 Mindlook 打开。',installed:'已安装，可以在启动台 / 开始菜单里找到 Mindlook',
   help:[['拖动空白处 / 滚轮','平移'],['⌘ + 滚轮，或 + / −','缩放'],['0 或 F','适应窗口'],['点击节点旁的圆点','折叠 / 展开该分支'],['双击节点','只看这一支（Esc 返回）'],['点击带 📝 的节点','查看备注'],['⌘K 或 /','搜索；Enter 下一个，Shift+Enter 上一个'],['方向键','在节点间移动（先点选一个节点）'],['空格','折叠 / 展开选中节点'],['1 / 2 / 3 / A','展开到第 1、2、3 级 / 全部展开'],['O','切换导图 / 大纲'],['Esc','关闭面板、清除搜索、退出聚焦'],['?','打开本帮助']]
 },
@@ -300,6 +316,8 @@ const I18N={
   errEnc:'This file is password-protected. Remove the password in XMind first.',errNotZip:'Not a .xmind file (cannot read as zip).',errNoContent:'No content.json / content.xml inside. Probably not an XMind file.',
   errOldBrowser:'This browser is too old to decompress files (needs Chrome 103+ / Safari 16.4+ / Firefox 113+). Use the xmindview command instead.',errFail:'Could not open: ',
   helpTitle:'Controls & shortcuts',helpFoot:'Everything stays on your machine and is gone when you close the page.',
+  pwTitle:'This file is password-protected',pwHint:'Hint: {h}',pwPlaceholder:'Password',pwOpen:'Open',pwCancel:'Cancel',pwWrong:'Wrong password, try again',pwPriv:'The password and the file stay in your browser. Nothing is sent anywhere.',pwBusy:'Decrypting…',
+  errOldCrypto:'This file uses the pre-3.7 XMind encryption. Re-save it in XMind and open it again.',errNoCrypto:'Decryption is unavailable here: open the page over HTTPS or as a local file.',errCancelled:'Cancelled.',
   install:'Install as app',installHint:'Once installed, double-clicking a .xmind file opens it in Mindlook.',installed:'Installed. Find Mindlook in your launcher or Start menu.',
   help:[['Drag empty space / wheel','Pan'],['⌘ + wheel, or + / −','Zoom'],['0 or F','Fit to window'],['Click the dot next to a topic','Collapse / expand branch'],['Double-click a topic','Focus on that branch (Esc to go back)'],['Click a topic with 📝','Show notes'],['⌘K or /','Search; Enter next, Shift+Enter previous'],['Arrow keys','Move between topics (select one first)'],['Space','Collapse / expand selected topic'],['1 / 2 / 3 / A','Expand to level 1, 2, 3 / all'],['O','Toggle map / outline'],['Esc','Close panels, clear search, exit focus'],['?','Open this help']]
 }};
@@ -315,6 +333,7 @@ function applyLang(){
   $('#zIn').title=t('zoomIn'); $('#zOut').title=t('zoomOut'); $('#zFit').title=t('fit'); $('#helpBtn').title=t('help');
   $('#eTitle').textContent=t('eTitle'); $('#eHint').textContent=t('eHint'); $('#eOpen').textContent=t('eOpen'); $('#eDemo').textContent=t('eDemo');
   $('#ePriv').textContent=t('ePriv'); $('#eCliLab').textContent=t('eCli'); $('#eInstallText').textContent=t('installHint'); $('#eInstallBtn').textContent=t('install');
+  $('#pwTitle').textContent=t('pwTitle'); $('#pwInput').placeholder=t('pwPlaceholder'); $('#pwOk').textContent=t('pwOpen'); $('#pwCancel').textContent=t('pwCancel'); $('#pwPriv').textContent=t('pwPriv');
   $('#focusLab').textContent=t('focusing'); $('#focusBack').textContent=t('back');
   $('#coachText').textContent=t('coach').replace(/⌘/g,isMac?'⌘':'Ctrl'); $('#coachOk').textContent=t('gotIt');
   $('#helpTitle').textContent=t('helpTitle'); $('#helpFoot').textContent=t('helpFoot');
@@ -466,15 +485,63 @@ function fromXml(text){
   });
 }
 function resourceNames(text){ const s=new Set(); const re=/xap:((?:resources|attachments)\/[^"'<>\\\s]+)/g; let m; while((m=re.exec(text))) s.add(m[1]); return [...s]; }
+/* ---------- 密码保护：读取清单里的加密参数，用 WebCrypto 在本地解密 ---------- */
+const b64=s=>{ const bin=atob(String(s||'').replace(/\s+/g,'')); const u=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; };
+function encFromObj(ed){ if(!ed) return null; return {algo:ed['algorithm-name']||'',kdf:ed['key-derivation-name']||'',salt:b64(ed.salt),iv:ed.iv?b64(ed.iv):new Uint8Array(16),iter:+(ed['iteration-count']||1024),bits:+(ed['key-size']||ed.size||128)}; }
+async function readEncryption(zip){
+  const out={hint:'',entries:{}};
+  if(zip.has('manifest.json')){
+    try{ const m=JSON.parse(await zip.text('manifest.json')); out.hint=m['password-hint']||''; const fe=m['file-entries']||{}; for(const k in fe){ const e=encFromObj(fe[k]&&fe[k]['encryption-data']); if(e) out.entries[k]=e; } }catch(e){}
+  }
+  if(zip.has('META-INF/manifest.xml')){
+    try{ const doc=new DOMParser().parseFromString(await zip.text('META-INF/manifest.xml'),'application/xml'); const root=doc.documentElement; out.hint=out.hint||root.getAttribute('password-hint')||'';
+      for(const fe of root.children){ if(fe.localName!=='file-entry') continue; const ed=[...fe.children].find(x=>x.localName==='encryption-data'); if(!ed) continue;
+        const alg=[...ed.children].find(x=>x.localName==='algorithm'), kd=[...ed.children].find(x=>x.localName==='key-derivation'); if(!kd) continue;
+        const g=(el,...names)=>{ for(const n of names){ const v=el&&el.getAttribute(n); if(v) return v; } return null; };
+        out.entries[fe.getAttribute('full-path')]=encFromObj({'algorithm-name':g(alg,'algorithm-name','name'),'key-derivation-name':g(kd,'key-derivation-name','name'),salt:g(kd,'salt'),iv:g(kd,'iv','key-iv'),'iteration-count':g(kd,'iteration-count'),'key-size':g(kd,'key-size','size')}); } }catch(e){}
+  }
+  return Object.keys(out.entries).length?out:null;
+}
+async function decryptBytes(data,e,password){
+  if(!(window.crypto&&crypto.subtle)) throw new Error(t('errNoCrypto'));
+  if(/PKCS12/i.test(e.kdf)) throw new Error(t('errOldCrypto'));
+  if(!/PBKDF2/i.test(e.kdf)||!/AES/i.test(e.algo)) throw new Error(t('errOldCrypto'));
+  const hash=/SHA256/i.test(e.kdf)?'SHA-256':/SHA1$/i.test(e.kdf)?'SHA-1':'SHA-512';
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash,salt:e.salt,iterations:e.iter},base,e.bits);
+  const key=await crypto.subtle.importKey('raw',bits,{name:'AES-CBC'},false,['decrypt']);
+  return new Uint8Array(await crypto.subtle.decrypt({name:'AES-CBC',iv:e.iv},key,data));
+}
+let pwResolve=null;
+function askPassword(name,hint,wrong){
+  return new Promise(res=>{
+    pwResolve=res; const box=$('#pw'); $('#pwFile').textContent=name||''; $('#pwHint').hidden=!hint; $('#pwHint').textContent=hint?t('pwHint',{h:hint}):''; $('#pwErr').textContent=wrong?t('pwWrong'):''; $('#pwInput').value=''; $('#pwOk').disabled=false; $('#pwOk').textContent=t('pwOpen');
+    box.classList.add('show'); setTimeout(()=>$('#pwInput').focus(),50);
+  });
+}
+function closePw(){ $('#pw').classList.remove('show'); pwResolve=null; }
+$('#pwForm').addEventListener('submit',e=>{ e.preventDefault(); if(!pwResolve) return; const r=pwResolve; pwResolve=null; $('#pwOk').disabled=true; $('#pwOk').textContent=t('pwBusy'); $('#pwErr').textContent=''; r($('#pwInput').value); });
+$('#pwCancel').onclick=()=>{ if(!pwResolve) return; const r=pwResolve; closePw(); r(null); };
 async function loadBuffer(buf,name){
   const zip=await readZip(buf);
-  let sheets, text;
-  if(zip.has('content.json')){ text=await zip.text('content.json'); sheets=fromJson(text); }
-  else if(zip.has('content.xml')){ text=await zip.text('content.xml'); sheets=fromXml(text); }
-  else if(zip.has('manifest.json')&&/encrypt|password/i.test(await zip.text('manifest.json'))) throw new Error(t('errEnc'));
-  else throw new Error(t('errNoContent'));
+  const main=zip.has('content.json')?'content.json':zip.has('content.xml')?'content.xml':null;
+  if(!main) throw new Error(t('errNoContent'));
+  const enc=await readEncryption(zip);
+  let text, password=null;
+  const parse=s=>main==='content.json'?fromJson(s):fromXml(s);
+  let sheets;
+  if(enc&&enc.entries[main]){
+    const raw=await zip.bytes(main); let wrong=false;
+    for(;;){
+      password=await askPassword(name,enc.hint,wrong);
+      if(password===null) throw new Error(t('errCancelled'));
+      try{ text=new TextDecoder('utf-8').decode(await decryptBytes(raw,enc.entries[main],password)); sheets=parse(text); break; }
+      catch(e){ if(e&&e.message&&/errOldCrypto|errNoCrypto|XMind 3\.7|pre-3\.7|HTTPS/.test(e.message)){ closePw(); throw e; } wrong=true; }
+    }
+    closePw();
+  } else { text=await zip.text(main); sheets=parse(text); }
   const res={};
-  for(const r of resourceNames(text)){ if(zip.has(r)){ try{ res[r]=await toDataUrl(await zip.bytes(r),r); }catch(e){} } }
+  for(const r of resourceNames(text)){ if(zip.has(r)){ try{ let b=await zip.bytes(r); if(enc&&enc.entries[r]&&password!==null) b=await decryptBytes(b,enc.entries[r],password); res[r]=await toDataUrl(b,r); }catch(e){} } }
   setData(sheets,name,await prepareRes(res));
 }
 async function loadFile(file){
@@ -874,6 +941,10 @@ if('launchQueue' in window&&window.launchQueue.setConsumer){ window.launchQueue.
 window.Mindlook={open:loadBuffer,exportImage,toMarkdown,setMode,setLevel,search:runSearch};
 /* ================= 启动 ================= */
 applyTheme(); applyLang();
+if(window.XMIND_FILE){
+  const f=window.XMIND_FILE; const u=b64(f.b64); delete window.XMIND_FILE;
+  loadBuffer(u.buffer,f.name).catch(e=>{ errEl.textContent=t('errFail')+(e.message||e); emptyEl.classList.remove('hidden'); });
+}
 if(window.XMIND_DATA){
   const d=window.XMIND_DATA;
   prepareRes(d.resources||{}).then(res=>setData(d.format==='xml'?fromXml(d.content):fromJson(d.content),d.name,res))

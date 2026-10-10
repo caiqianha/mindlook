@@ -25,6 +25,14 @@ RES_RE = re.compile(r"xap:((?:resources|attachments)/[^\"'<>\\\s]+)")
 MAX_RES = 20 * 1024 * 1024  # 内嵌图片总量上限，超过则跳过剩余图片
 
 
+def is_encrypted(zf, names):
+    """清单里带 encryption-data 的就是密码保护文件（新版 manifest.json / 旧版 META-INF/manifest.xml）。"""
+    for m in ("manifest.json", "META-INF/manifest.xml"):
+        if m in names and b"encryption-data" in zf.read(m):
+            return True
+    return False
+
+
 def extract(path: Path):
     """返回 (format, content, resources)。format 为 'json'（XMind 2020+）或 'xml'（XMind 8）。
     resources 是 {zip内路径: data URI}，只包含正文引用到的图片。"""
@@ -34,12 +42,12 @@ def extract(path: Path):
         raise SystemExit(f"错误：{path} 不是有效的 .xmind 文件（无法作为 zip 打开）")
     with zf:
         names = set(zf.namelist())
+        if is_encrypted(zf, names):
+            return "file", None, None
         if "content.json" in names:
             fmt, content = "json", zf.read("content.json").decode("utf-8")
         elif "content.xml" in names:
             fmt, content = "xml", zf.read("content.xml").decode("utf-8")
-        elif "manifest.json" in names and b"encrypt" in zf.read("manifest.json").lower():
-            raise SystemExit(f"错误：{path} 设置了密码，需要先在 XMind 中解除密码再查看")
         else:
             raise SystemExit(f"错误：{path} 里找不到 content.json / content.xml")
         resources, total = {}, 0
@@ -58,11 +66,16 @@ def extract(path: Path):
 
 def build_html(path: Path) -> str:
     fmt, content, resources = extract(path)
-    data = json.dumps({"name": path.name, "format": fmt, "content": content, "resources": resources}, ensure_ascii=False)
-    data = data.replace("</", "<\\/")  # 防止内容里的 </script> 提前结束脚本
     tpl = TEMPLATE.read_text(encoding="utf-8")
     if MARK not in tpl:
         raise SystemExit(f"错误：模板 {TEMPLATE} 缺少 {MARK} 标记")
+    if fmt == "file":
+        # 密码保护的文件：把原文件整个嵌进网页，由浏览器在本地提示输入密码并解密
+        print("提示：这是密码保护文件，打开网页后输入密码即可查看", file=sys.stderr)
+        data = json.dumps({"name": path.name, "b64": base64.b64encode(path.read_bytes()).decode("ascii")})
+        return tpl.replace(MARK, f"<script>window.XMIND_FILE={data};</script>")
+    data = json.dumps({"name": path.name, "format": fmt, "content": content, "resources": resources}, ensure_ascii=False)
+    data = data.replace("</", "<\\/")  # 防止内容里的 </script> 提前结束脚本
     return tpl.replace(MARK, f"<script>window.XMIND_DATA={data};</script>")
 
 
