@@ -28,6 +28,13 @@
 
 需要 Chrome 103+ / Edge 103+ / Safari 16.4+ / Firefox 113+。
 
+### 安装为应用（推荐）
+
+用 Chrome 或 Edge 打开在线地址，点右上角「⋯」→「安装为应用」（或地址栏右侧的安装图标）。安装后：
+
+- 可以离线使用
+- 在系统里把 .xmind 文件的打开方式设为 Mindlook，之后**双击文件就直接打开**（Chrome / Edge 桌面版支持）
+
 ### 命令行（macOS / Linux，需要 Python 3）
 
 ```bash
@@ -64,6 +71,7 @@ xmindview -o 输出.html 文件.xmind    # 指定输出位置（可分享给别�
 
 ```
 index.html        查看器本体（也是命令行的模板）
+manifest.webmanifest / sw.js / icons/   PWA：安装、离线、.xmind 文件关联
 xmindview.py      命令行：解析 .xmind，内嵌数据生成 HTML 并打开
 xmindview         shell 包装
 samples/          示例 .xmind 文件
@@ -82,7 +90,7 @@ View `.xmind` mind maps without installing XMind. A single HTML file, zero depen
 
 **Features**: both XMind 2020+ and XMind 8 formats · map, logic, tree, org-chart and timeline structures · sheets, rich-text notes, labels, links, images, markers, floating topics, relationships, boundaries, summaries · search (⌘K), expand by level, focus a branch, keyboard navigation, outline view · export Markdown / PNG / SVG · light & dark, Chinese & English, mobile friendly · CLI: `xmindview file.xmind` opens it in your browser.
 
-**Use**: open `index.html` and drop a file in (try `samples/sample.xmind`), or deploy it anywhere static. Needs Chrome 103+ / Safari 16.4+ / Firefox 113+.
+**Use**: open `index.html` and drop a file in (try `samples/sample.xmind`), or deploy it anywhere static. Installed as a PWA (Chrome / Edge), it works offline and registers as a handler for .xmind files, so double-clicking a file opens it directly. Needs Chrome 103+ / Safari 16.4+ / Firefox 113+.
 
 **CLI**: `alias xmindview='python3 -I /path/to/mindlook/xmindview.py'` then `xmindview file.xmind`. Use `-o out.html` to produce a self-contained page you can share.
 

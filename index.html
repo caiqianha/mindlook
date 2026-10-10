@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mindlook · XMind 查看器</title>
 <meta name="description" content="不装软件也能查看 .xmind 思维导图。文件只在浏览器本地解析，不上传。">
+<meta name="theme-color" content="#1b1f24">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>
 :root{
   --bg:#f3f4f6; --panel:#ffffff; --ink:#1b1f24; --muted:#6a7380; --line:#dfe3e8; --soft:#eef0f3;
@@ -168,6 +172,8 @@ body.dragging #empty .box{border-color:var(--accent);background:var(--soft)}
 #empty .act .ib.ghost{border:1px solid var(--line);color:var(--ink)}
 #empty code{display:block;background:var(--soft);padding:10px 12px;border-radius:8px;margin-top:8px;text-align:left;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;user-select:all;color:var(--ink)}
 #empty .err{color:var(--c3);margin-top:12px;font-size:13px;white-space:pre-wrap}
+#empty .install{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding:10px 14px;border-radius:10px;background:var(--soft);font-size:13px}
+#empty .install .ib{height:30px;padding:0 12px;font-size:13px}
 #empty details{margin-top:14px;color:var(--muted);font-size:13px}
 #empty summary{cursor:pointer}
 
@@ -242,6 +248,7 @@ body.dragging #empty .box{border-color:var(--accent);background:var(--soft)}
       <p id="eHint"></p>
       <div class="act"><button class="ib primary" id="eOpen"></button><button class="ib ghost" id="eDemo"></button></div>
       <p id="ePriv"></p>
+      <p class="install" id="eInstall" hidden><span id="eInstallText"></span> <button class="ib ghost" id="eInstallBtn"></button></p>
       <details><summary id="eCliLab"></summary><code>xmindview /path/to/file.xmind</code></details>
       <div class="err" id="err"></div>
     </div>
@@ -276,6 +283,7 @@ const I18N={
   errEnc:'这个文件设置了密码，请先在 XMind 里解除密码再打开。',errNotZip:'这不是 .xmind 文件（无法按 zip 读取）。',errNoContent:'文件里找不到 content.json / content.xml，可能不是 XMind 文件。',
   errOldBrowser:'当前浏览器太旧，不支持解压（需要 Chrome 103+ / Safari 16.4+ / Firefox 113+）。可以改用命令行 xmindview 打开。',errFail:'打开失败：',
   helpTitle:'操作与快捷键',helpFoot:'文件只在本地解析，关闭页面即消失。',
+  install:'安装为应用',installHint:'安装成应用后，双击 .xmind 文件就能直接用 Mindlook 打开。',installed:'已安装，可以在启动台 / 开始菜单里找到 Mindlook',
   help:[['拖动空白处 / 滚轮','平移'],['⌘ + 滚轮，或 + / −','缩放'],['0 或 F','适应窗口'],['点击节点旁的圆点','折叠 / 展开该分支'],['双击节点','只看这一支（Esc 返回）'],['点击带 📝 的节点','查看备注'],['⌘K 或 /','搜索；Enter 下一个，Shift+Enter 上一个'],['方向键','在节点间移动（先点选一个节点）'],['空格','折叠 / 展开选中节点'],['1 / 2 / 3 / A','展开到第 1、2、3 级 / 全部展开'],['O','切换导图 / 大纲'],['Esc','关闭面板、清除搜索、退出聚焦'],['?','打开本帮助']]
 },
 'en':{
@@ -292,6 +300,7 @@ const I18N={
   errEnc:'This file is password-protected. Remove the password in XMind first.',errNotZip:'Not a .xmind file (cannot read as zip).',errNoContent:'No content.json / content.xml inside. Probably not an XMind file.',
   errOldBrowser:'This browser is too old to decompress files (needs Chrome 103+ / Safari 16.4+ / Firefox 113+). Use the xmindview command instead.',errFail:'Could not open: ',
   helpTitle:'Controls & shortcuts',helpFoot:'Everything stays on your machine and is gone when you close the page.',
+  install:'Install as app',installHint:'Once installed, double-clicking a .xmind file opens it in Mindlook.',installed:'Installed. Find Mindlook in your launcher or Start menu.',
   help:[['Drag empty space / wheel','Pan'],['⌘ + wheel, or + / −','Zoom'],['0 or F','Fit to window'],['Click the dot next to a topic','Collapse / expand branch'],['Double-click a topic','Focus on that branch (Esc to go back)'],['Click a topic with 📝','Show notes'],['⌘K or /','Search; Enter next, Shift+Enter previous'],['Arrow keys','Move between topics (select one first)'],['Space','Collapse / expand selected topic'],['1 / 2 / 3 / A','Expand to level 1, 2, 3 / all'],['O','Toggle map / outline'],['Esc','Close panels, clear search, exit focus'],['?','Open this help']]
 }};
 let lang=(()=>{ try{ const s=localStorage.getItem('ml.lang'); if(s&&I18N[s]) return s; }catch(e){} return /^zh/i.test(navigator.language)?'zh-CN':'en'; })();
@@ -305,7 +314,7 @@ function applyLang(){
   $('#moreBtn').title=t('more'); $('#btnOpen span').textContent=t('open'); $('#btnOpen').title=t('open');
   $('#zIn').title=t('zoomIn'); $('#zOut').title=t('zoomOut'); $('#zFit').title=t('fit'); $('#helpBtn').title=t('help');
   $('#eTitle').textContent=t('eTitle'); $('#eHint').textContent=t('eHint'); $('#eOpen').textContent=t('eOpen'); $('#eDemo').textContent=t('eDemo');
-  $('#ePriv').textContent=t('ePriv'); $('#eCliLab').textContent=t('eCli');
+  $('#ePriv').textContent=t('ePriv'); $('#eCliLab').textContent=t('eCli'); $('#eInstallText').textContent=t('installHint'); $('#eInstallBtn').textContent=t('install');
   $('#focusLab').textContent=t('focusing'); $('#focusBack').textContent=t('back');
   $('#coachText').textContent=t('coach').replace(/⌘/g,isMac?'⌘':'Ctrl'); $('#coachOk').textContent=t('gotIt');
   $('#helpTitle').textContent=t('helpTitle'); $('#helpFoot').textContent=t('helpFoot');
@@ -314,6 +323,7 @@ function applyLang(){
   buildMenus(); updateStat();
 }
 
+let installEvt=null;
 /* ================= 主题 ================= */
 let theme=(()=>{ try{ return localStorage.getItem('ml.theme')||'system'; }catch(e){ return 'system'; } })();
 function applyTheme(){ if(theme==='system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme=theme; try{ localStorage.setItem('ml.theme',theme); }catch(e){} buildMenus(); }
@@ -328,6 +338,7 @@ function buildMenus(){
   const lab=document.createElement('div'); lab.className='lab'; lab.textContent=t('theme'); mp.appendChild(lab);
   [['system','themeSys'],['light','themeLight'],['dark','themeDark']].forEach(([v,k])=>{ const b=document.createElement('button'); b.textContent=t(k); b.className=theme===v?'on':''; b.onclick=()=>{ theme=v; applyTheme(); closeMenus(); }; mp.appendChild(b); });
   const sep=document.createElement('div'); sep.className='sep'; mp.appendChild(sep);
+  if(installEvt){ const ib=document.createElement('button'); ib.textContent=t('install'); ib.onclick=()=>{ closeMenus(); promptInstall(); }; mp.appendChild(ib); }
   const sm=document.createElement('button'); sm.className='only-sm'; sm.textContent=state.mode==='map'?t('outline'):t('map'); sm.onclick=()=>{ setMode(state.mode==='map'?'outline':'map'); closeMenus(); }; mp.appendChild(sm);
   const lb=document.createElement('button'); lb.textContent=t('lang'); lb.onclick=()=>{ lang=lang==='zh-CN'?'en':'zh-CN'; try{ localStorage.setItem('ml.lang',lang); }catch(e){} applyLang(); closeMenus(); }; mp.appendChild(lb);
   const hb=document.createElement('button'); hb.textContent=t('help'); hb.onclick=()=>{ closeMenus(); $('#help').classList.add('show'); }; mp.appendChild(hb);
@@ -853,6 +864,13 @@ $('#eDemo').onclick=()=>{
   setData(fromJson(JSON.stringify(demo)),t('demoName'),{});
 };
 
+/* ================= PWA：离线缓存、安装、文件关联 ================= */
+function promptInstall(){ if(!installEvt) return; installEvt.prompt(); installEvt.userChoice.then(()=>{ installEvt=null; $('#eInstall').hidden=true; buildMenus(); }).catch(()=>{}); }
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); installEvt=e; $('#eInstall').hidden=false; buildMenus(); });
+window.addEventListener('appinstalled',()=>{ installEvt=null; $('#eInstall').hidden=true; buildMenus(); toast(t('installed')); });
+$('#eInstallBtn').onclick=promptInstall;
+if(/^https?:$/.test(location.protocol)&&'serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
+if('launchQueue' in window&&window.launchQueue.setConsumer){ window.launchQueue.setConsumer(async p=>{ if(!p.files||!p.files.length) return; try{ loadFile(await p.files[0].getFile()); }catch(e){ errEl.textContent=t('errFail')+(e.message||e); } }); }
 window.Mindlook={open:loadBuffer,exportImage,toMarkdown,setMode,setLevel,search:runSearch};
 /* ================= 启动 ================= */
 applyTheme(); applyLang();
