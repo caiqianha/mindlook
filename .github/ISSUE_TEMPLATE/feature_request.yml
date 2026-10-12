@@ -1,0 +1,21 @@
+name: 功能建议 / Feature request
+description: 想要新的展示能力或交互 / Suggest a new rendering feature or interaction
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想解决什么问题 / What problem would this solve
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望的做法 / Proposed behaviour
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: 范围确认 / Scope check
+      options:
+        - label: 这个建议不需要任何网络请求、外部脚本或第三方服务 / This does not require any network request, external script or third-party service
+          required: true

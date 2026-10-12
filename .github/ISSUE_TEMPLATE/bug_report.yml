@@ -1,0 +1,37 @@
+name: Bug 报告 / Bug report
+description: 某个文件打不开、显示不对、功能异常 / Something does not open or render correctly
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **请勿上传包含机密内容的 .xmind 文件。** 如需附件，请用 `samples/sample.xmind` 复现，或新建一个只含占位文字的最小文件。
+        **Do NOT attach confidential .xmind files.** Reproduce with `samples/sample.xmind` or a minimal file containing only placeholder text.
+  - type: textarea
+    id: what
+    attributes:
+      label: 现象 / What happened
+      description: 期望看到什么、实际看到什么 / What you expected vs. what you saw
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      placeholder: |
+        1. 打开 index.html / Open index.html
+        2. 拖入文件… / Drop the file…
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: 环境 / Environment
+      placeholder: Chrome 128 / macOS 15；文件来自 XMind 2024 还是 XMind 8 / which XMind version produced the file
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: 控制台报错（可选）/ Console errors (optional)
+      render: text

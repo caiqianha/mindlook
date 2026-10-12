@@ -1,8 +1,93 @@
 # Mindlook
 
+> View `.xmind` mind maps in your browser — one HTML file, no install, nothing leaves your machine.
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/caiqianha/mindlook/actions/workflows/ci.yml/badge.svg)](https://github.com/caiqianha/mindlook/actions/workflows/ci.yml)
+
+English · [中文](#中文)
+
+![Mindlook screenshot](docs/screenshot.png)
+
+Try it: [caiqianha.github.io/mindlook](https://caiqianha.github.io/mindlook/) (drop in `samples/sample.xmind`).
+
+## What
+
+A read-only viewer for XMind files, written as a single `index.html` with zero dependencies and no build step. It unzips the file with the browser's native `DecompressionStream`, parses `content.json` (XMind 2020+) or `content.xml` (XMind 8) and lays the map out itself. A small Python CLI (`xmindview`) wraps the same page so you can open a file from the terminal or hand a self-contained HTML to someone who does not have XMind.
+
+## Why
+
+You get sent an `.xmind` file and only want to read it. Installing XMind, signing in, or uploading the file to a web converter is more than that deserves — and the file may be confidential.
+
+## How to use
+
+- **Web**: open `index.html` (or the hosted page), then drag a file in or click *Open file*. Works in Chrome 103+ / Edge 103+ / Safari 16.4+ / Firefox 113+.
+- **Install as an app** (Chrome / Edge): use the browser's *Install* action. The PWA works offline and registers as a handler for `.xmind`, so double-clicking a file opens it directly.
+- **CLI** (macOS / Linux, Python 3):
+
+  ```bash
+  ln -s /path/to/mindlook/xmindview ~/bin/xmindview   # or: alias xmindview='python3 -I /path/to/mindlook/xmindview.py'
+  xmindview file.xmind              # render and open in the default browser
+  xmindview --no-open file.xmind    # render only, print the path
+  xmindview -o out.html file.xmind  # self-contained page with the data embedded; share it freely
+  ```
+
+  Without `-o` the page goes to a private temporary directory created with `mkdtemp` (mode 0700).
+
+### Keyboard shortcuts
+
+| Action | Keys |
+|---|---|
+| Search | `Ctrl/⌘ + K` or `/`; `Enter` next, `Shift + Enter` previous |
+| Zoom / fit to window | `+` `−` / `0` or `F`; `Ctrl/⌘ + wheel` to zoom |
+| Expand to level 1 / 2 / 3 / all | `1` `2` `3` / `A` |
+| Map / outline | `O` |
+| Move between topics / collapse | Arrow keys / `Space` |
+| Focus a branch / back | double-click a topic / `Esc` |
+| Help | `?` |
+
+## Privacy
+
+- The file is read with the File API and parsed in the page. There is no upload, no `fetch`, no analytics, no CDN script and no web font.
+- Password-protected files are decrypted locally with WebCrypto (PBKDF2 + AES); the password never leaves the page.
+- The page ships a Content-Security-Policy with `connect-src 'none'`, so the browser itself blocks any outbound request, and CI fails if a URL other than a W3C namespace identifier appears in `index.html` or `sw.js`.
+- Nothing is stored except three `localStorage` preferences (language, theme, "tip dismissed").
+
+## What is rendered
+
+Both formats (XMind 2020+ `content.json`, XMind 8 `content.xml`) · multiple sheets · map, logic, tree, org-chart and timeline structures, per-topic · floating topics · relationships · boundaries · summaries · labels · hyperlinks · images · markers · plain and rich-text notes (bold, lists, links, images) · export to Markdown, PNG and SVG · light / dark · Chinese / English · touch and mobile.
+
+## Limits
+
+- Files encrypted with the pre-3.7 XMind scheme (PKCS12 key derivation) are not supported; re-save them in a current XMind.
+- Fishbone and matrix layouts are approximated with the logic / tree layouts. Callouts are not rendered.
+- Topic colours, fonts and themes stored in the file are ignored; Mindlook uses its own palette.
+- Markers are drawn as simple glyphs (priority number, flag, star, task progress, …), not XMind's icons.
+- Only `http(s)` hyperlinks are clickable; links to other topics (`xmind:#…`) and attached non-image files are not shown.
+- The CLI embeds at most 20 MB of images per file; images beyond that are skipped with a notice.
+- Viewing only — no editing.
+
+## Project layout
+
+```
+index.html        the viewer (also the CLI's template)
+manifest.webmanifest / sw.js / icons/   PWA: install, offline cache, .xmind file handler
+xmindview.py      CLI: parse .xmind, embed the data into the page, open it
+xmindview         shell wrapper (resolves symlinks, runs the CLI with python3 -I)
+samples/          sample .xmind
+docs/             screenshot used by this README
+.github/          CI workflow and issue templates
+```
+
+MIT licensed. Mindlook is not affiliated with XMind Ltd.; XMind is a trademark of XMind Ltd.
+
+---
+
+## 中文
+
 不装 XMind 也能查看 `.xmind` 思维导图。单个 HTML 文件，零依赖，文件只在浏览器本地解析，不上传。
 
-[English](#english) · 中文
+[English](#mindlook) · 中文
 
 ![Mindlook 截图](docs/screenshot.png)
 
@@ -82,17 +167,3 @@ docs/             README 用到的截图
 ## 许可
 
 MIT。Mindlook 与 XMind Ltd. 无关，XMind 是 XMind Ltd. 的商标。
-
----
-
-## English
-
-View `.xmind` mind maps without installing XMind. A single HTML file, zero dependencies, parsed entirely in your browser. Nothing is uploaded.
-
-**Features**: both XMind 2020+ and XMind 8 formats · map, logic, tree, org-chart and timeline structures · sheets, rich-text notes, labels, links, images, markers, floating topics, relationships, boundaries, summaries · password-protected files decrypted locally with WebCrypto · search (⌘K), expand by level, focus a branch, keyboard navigation, outline view · export Markdown / PNG / SVG · light & dark, Chinese & English, mobile friendly · CLI: `xmindview file.xmind` opens it in your browser.
-
-**Use**: open `index.html` and drop a file in (try `samples/sample.xmind`), or deploy it anywhere static. Installed as a PWA (Chrome / Edge), it works offline and registers as a handler for .xmind files, so double-clicking a file opens it directly. Needs Chrome 103+ / Safari 16.4+ / Firefox 113+.
-
-**CLI**: `alias xmindview='python3 -I /path/to/mindlook/xmindview.py'` then `xmindview file.xmind`. Use `-o out.html` to produce a self-contained page you can share.
-
-MIT licensed. Not affiliated with XMind Ltd.; XMind is a trademark of XMind Ltd.

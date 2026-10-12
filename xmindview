@@ -1,4 +1,13 @@
 #!/bin/sh
 # 包装脚本：xmindview 文件.xmind
-DIR="$(cd "$(dirname "$(readlink "$0" || echo "$0")")" && pwd)"
+# 逐级解析自身的符号链接（兼容相对链接；macOS 的 readlink 没有 -f）
+SELF="$0"
+while [ -L "$SELF" ]; do
+  LINK="$(readlink "$SELF")"
+  case "$LINK" in
+    /*) SELF="$LINK" ;;
+    *) SELF="$(dirname "$SELF")/$LINK" ;;
+  esac
+done
+DIR="$(cd "$(dirname "$SELF")" && pwd -P)"
 exec python3 -I "$DIR/xmindview.py" "$@"

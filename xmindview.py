@@ -6,6 +6,7 @@
   xmindview --no-open 文件.xmind   # 只生成 HTML，打印路径，不打开浏览器
   xmindview -o 输出.html 文件.xmind  # 指定输出位置
 """
+import argparse
 import base64
 import json
 import mimetypes
@@ -87,40 +88,37 @@ def open_in_browser(html_path: Path):
 
 
 def main(argv):
-    args = argv[1:]
-    if not args or args[0] in ("-h", "--help"):
-        print(__doc__.strip())
-        return 0 if args else 1
-    no_open = False
-    out_path = None
-    files = []
-    i = 0
-    while i < len(args):
-        a = args[i]
-        if a == "--no-open":
-            no_open = True
-        elif a == "-o":
-            i += 1
-            out_path = Path(args[i]).expanduser()
-        else:
-            files.append(Path(a).expanduser())
-        i += 1
+    parser = argparse.ArgumentParser(
+        prog="xmindview", description=__doc__.strip(), formatter_class=argparse.RawDescriptionHelpFormatter, add_help=True)
+    parser.add_argument("files", nargs="*", metavar="文件.xmind", help="要查看的 .xmind 文件（可多个）")
+    parser.add_argument("--no-open", action="store_true", help="只生成 HTML，打印路径，不打开浏览器")
+    parser.add_argument("-o", "--output", metavar="输出.html", help="指定输出位置（只能配合单个文件）")
+    if not argv[1:]:
+        parser.print_help()
+        return 1
+    args = parser.parse_args(argv[1:])
+    files = [Path(a).expanduser() for a in args.files]
+    out_path = Path(args.output).expanduser() if args.output else None
     if not files:
-        raise SystemExit("错误：请提供 .xmind 文件路径")
+        parser.error("请提供 .xmind 文件路径")
     if out_path and len(files) > 1:
-        raise SystemExit("错误：-o 只能配合单个文件使用")
+        parser.error("-o 只能配合单个文件使用")
 
-    out_dir = Path(tempfile.gettempdir()) / "xmindview"
-    out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = None  # 未指定 -o 时，用仅当前用户可读的私有临时目录（mkdtemp 为 0700）
     for f in files:
         f = f.resolve()
         if not f.is_file():
             raise SystemExit(f"错误：文件不存在 {f}")
         html = build_html(f)
-        target = out_path or (out_dir / (f.stem + ".html"))
+        if out_path:
+            target = out_path
+        else:
+            if out_dir is None:
+                out_dir = Path(tempfile.mkdtemp(prefix="xmindview-"))
+            target = out_dir / (f.stem + ".html")
         target.write_text(html, encoding="utf-8")
         print(target)
-        if not no_open:
+        if not args.no_open:
             open_in_browser(target)
     return 0
 

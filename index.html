@@ -2,19 +2,22 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: blob:; connect-src 'none'; img-src 'self' data: blob:; worker-src 'self' blob:">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mindlook · XMind 查看器</title>
 <meta name="description" content="不装软件也能查看 .xmind 思维导图。文件只在浏览器本地解析，不上传。">
-<meta name="theme-color" content="#1b1f24">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#191d23" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>
 :root{
-  --bg:#f3f4f6; --panel:#ffffff; --ink:#1b1f24; --muted:#6a7380; --line:#dfe3e8; --soft:#eef0f3;
+  --bg:#f3f4f6; --panel:#ffffff; --ink:#1b1f24; --muted:#626b78; --line:#dfe3e8; --soft:#eef0f3;
   --paper:#ffffff; --accent:#2f6fed; --hit:#ffd54a; --hit-ink:#5b4300;
   --shadow:0 1px 2px rgba(16,24,40,.08),0 4px 14px rgba(16,24,40,.06);
-  --c0:#2f6fed; --c1:#0f9d6e; --c2:#e0821b; --c3:#d9414e; --c4:#7b4fe0; --c5:#0c93b4; --c6:#d1479c; --c7:#6f9c0c;
+  --c0:#2f6fed; --c1:#0b8259; --c2:#a85f12; --c3:#cf3b48; --c4:#7b4fe0; --c5:#0a7d99; --c6:#c23f90; --c7:#597d0a;
+  --on-branch:#ffffff;
   --radius:10px;
 }
 @media (prefers-color-scheme: dark){
@@ -23,6 +26,7 @@
     --paper:#111418; --accent:#6b9cff; --hit:#f2c94c; --hit-ink:#2b2000;
     --shadow:0 1px 2px rgba(0,0,0,.5),0 6px 18px rgba(0,0,0,.35);
     --c0:#6b9cff; --c1:#3ccf9a; --c2:#f5a34a; --c3:#ff6b76; --c4:#a98bff; --c5:#3fc3e3; --c6:#f07ac0; --c7:#a6d43c;
+    --on-branch:#111418;
   }
 }
 :root[data-theme="dark"]{
@@ -30,6 +34,7 @@
   --paper:#111418; --accent:#6b9cff; --hit:#f2c94c; --hit-ink:#2b2000;
   --shadow:0 1px 2px rgba(0,0,0,.5),0 6px 18px rgba(0,0,0,.35);
   --c0:#6b9cff; --c1:#3ccf9a; --c2:#f5a34a; --c3:#ff6b76; --c4:#a98bff; --c5:#3fc3e3; --c6:#f07ac0; --c7:#a6d43c;
+    --on-branch:#111418;
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
@@ -89,7 +94,7 @@ svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 #nodes{position:absolute;left:0;top:0}
 .node{position:absolute;width:max-content;max-width:300px;padding:7px 12px;border-radius:var(--radius);background:var(--panel);box-shadow:var(--shadow);white-space:pre-wrap;word-break:break-word;user-select:none;cursor:default;line-height:1.4}
 .node.d0{background:var(--ink);color:var(--paper);font-size:17px;font-weight:600;padding:11px 20px;border-radius:14px;max-width:340px;box-shadow:none}
-.node.d1{background:var(--branch);color:#fff;font-weight:500;box-shadow:none}
+.node.d1{background:var(--branch);color:var(--on-branch);font-weight:500;box-shadow:none}
 .node.deep{background:none;box-shadow:none;border-radius:0;padding:3px 8px 4px;border-bottom:2px solid var(--branch)}
 .node.card{background:var(--panel);box-shadow:none;border:1px solid var(--line);border-left:3px solid var(--branch)}
 .node.sum{background:var(--panel);box-shadow:none;border:1.5px solid var(--branch);color:var(--ink);font-weight:400}
@@ -99,14 +104,14 @@ svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .node.hit.cur{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--hit-ink)}
 .node .lbl{display:block;font-size:11px;opacity:.75;margin-top:1px}
 .node .mk{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:rgba(127,127,127,.18);font-size:11px;font-weight:600;margin-right:4px;vertical-align:-3px}
-.node .mk.p{background:var(--c3);color:#fff}
+.node .mk.p{background:var(--c3);color:var(--on-branch)}
 .node .nt{display:inline-block;margin-left:6px;font-size:12px;opacity:.75}
 .node img{display:block;border-radius:6px;margin-bottom:6px}
 .node a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 .node .tg{position:absolute;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;background:var(--panel);color:var(--ink);border:1.5px solid var(--branch);font-size:11px;line-height:15px;text-align:center;cursor:pointer;z-index:1}
 .node .tg.r{right:-11px}.node .tg.l{left:-11px}
 .node .tg.b,.node .tg.t{left:50%;transform:translateX(-50%)}.node .tg.b{top:auto;bottom:-11px}.node .tg.t{top:-11px}
-.node .tg:hover{background:var(--branch);color:#fff}
+.node .tg:hover{background:var(--branch);color:var(--on-branch)}
 .node.has-notes{cursor:pointer}
 
 /* ---- HUD ---- */
@@ -128,6 +133,10 @@ svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 :root[data-theme="dark"] .coach button,:root:not([data-theme="light"]) .coach button{background:rgba(0,0,0,.15)}
 #toast{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .15s;pointer-events:none;z-index:30}
 #toast.show{opacity:1}
+#busy{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 16px;border-radius:999px;font-size:13px;display:none;align-items:center;gap:8px;z-index:31}
+#busy.show{display:flex}
+#busy::before{content:"";width:12px;height:12px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:ml-spin .8s linear infinite}
+@keyframes ml-spin{to{transform:rotate(360deg)}}
 
 /* ---- 备注面板 ---- */
 #detail{position:absolute;right:12px;bottom:56px;width:min(400px,calc(100% - 24px));max-height:45%;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);display:none;z-index:5}
@@ -217,7 +226,7 @@ body.dragging #empty .box{border-color:var(--accent);background:var(--soft)}
   .coach{max-width:calc(100% - 24px);bottom:56px}
   .hud .stat{display:none}
 }
-@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}#busy::before{animation:none}}
 @media print{.bar,.hud,.help-btn,.coach,#detail,#empty{display:none!important}#stage{overflow:visible}}
 </style>
 </head>
@@ -266,9 +275,10 @@ body.dragging #empty .box{border-color:var(--accent);background:var(--soft)}
       <div class="err" id="err"></div>
     </div>
   </div>
-  <div id="help"><div class="card"><button class="x" id="helpClose">×</button><h2 id="helpTitle"></h2><table id="helpTable"></table><p class="foot" id="helpFoot"></p></div></div>
-  <div id="pw"><form class="card" id="pwForm"><h2 id="pwTitle"></h2><p class="f" id="pwFile"></p><p class="hint" id="pwHint" hidden></p><input id="pwInput" type="password" autocomplete="off"><div class="err" id="pwErr"></div><div class="row"><button type="button" class="ib ghost" id="pwCancel"></button><button type="submit" class="ib primary" id="pwOk"></button></div><p class="priv" id="pwPriv"></p></form></div>
-  <div id="toast"></div>
+  <div id="help"><div class="card" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><button class="x" id="helpClose">×</button><h2 id="helpTitle"></h2><table id="helpTable"></table><p class="foot" id="helpFoot"></p></div></div>
+  <div id="pw"><form class="card" id="pwForm" role="dialog" aria-modal="true" aria-labelledby="pwTitle"><h2 id="pwTitle"></h2><p class="f" id="pwFile"></p><p class="hint" id="pwHint" hidden></p><input id="pwInput" type="password" autocomplete="off"><div class="err" id="pwErr"></div><div class="row"><button type="button" class="ib ghost" id="pwCancel"></button><button type="submit" class="ib primary" id="pwOk"></button></div><p class="priv" id="pwPriv"></p></form></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="busy" role="status" aria-live="polite"></div>
 </div>
 <input type="file" id="file" accept=".xmind,application/zip,application/octet-stream" hidden>
 <!--XMIND_DATA-->
@@ -294,7 +304,8 @@ const I18N={
   coach:'拖动空白处平移 · ⌘ + 滚轮缩放 · 点节点旁的圆点折叠 · 双击节点只看这一支',
   copied:'已复制 Markdown',downloaded:'已下载 {f}',pngFail:'这个浏览器不支持导出 PNG，已改为导出 SVG',
   noMatch:'无匹配',matches:'{i} / {n}',notes:'备注',demoName:'示例.xmind',
-  errEnc:'这个文件设置了密码，请先在 XMind 里解除密码再打开。',errNotZip:'这不是 .xmind 文件（无法按 zip 读取）。',errNoContent:'文件里找不到 content.json / content.xml，可能不是 XMind 文件。',
+  errZipEntry:'压缩包条目损坏：{n}',errZipMethod:'不支持的压缩方式：{m}',errXml:'content.xml 解析失败。',parsing:'正在解析…',close:'关闭',expand:'展开',collapse:'折叠',
+  errNotZip:'这不是 .xmind 文件（无法按 zip 读取）。',errNoContent:'文件里找不到 content.json / content.xml，可能不是 XMind 文件。',
   errOldBrowser:'当前浏览器太旧，不支持解压（需要 Chrome 103+ / Safari 16.4+ / Firefox 113+）。可以改用命令行 xmindview 打开。',errFail:'打开失败：',
   helpTitle:'操作与快捷键',helpFoot:'文件只在本地解析，关闭页面即消失。',
   pwTitle:'这个文件设置了密码',pwHint:'密码提示：{h}',pwPlaceholder:'输入密码',pwOpen:'打开',pwCancel:'取消',pwWrong:'密码不对，再试一次',pwPriv:'密码和文件都只在你的浏览器里处理，不会发送到任何地方。',pwBusy:'正在解密…',
@@ -313,7 +324,8 @@ const I18N={
   coach:'Drag to pan · ⌘ + wheel to zoom · click the dot next to a topic to collapse · double-click to focus a branch',
   copied:'Markdown copied',downloaded:'Downloaded {f}',pngFail:'This browser cannot export PNG, exported SVG instead',
   noMatch:'No match',matches:'{i} / {n}',notes:'Notes',demoName:'sample.xmind',
-  errEnc:'This file is password-protected. Remove the password in XMind first.',errNotZip:'Not a .xmind file (cannot read as zip).',errNoContent:'No content.json / content.xml inside. Probably not an XMind file.',
+  errZipEntry:'Broken zip entry: {n}',errZipMethod:'Unsupported zip compression method: {m}',errXml:'Could not parse content.xml.',parsing:'Parsing…',close:'Close',expand:'Expand',collapse:'Collapse',
+  errNotZip:'Not a .xmind file (cannot read as zip).',errNoContent:'No content.json / content.xml inside. Probably not an XMind file.',
   errOldBrowser:'This browser is too old to decompress files (needs Chrome 103+ / Safari 16.4+ / Firefox 113+). Use the xmindview command instead.',errFail:'Could not open: ',
   helpTitle:'Controls & shortcuts',helpFoot:'Everything stays on your machine and is gone when you close the page.',
   pwTitle:'This file is password-protected',pwHint:'Hint: {h}',pwPlaceholder:'Password',pwOpen:'Open',pwCancel:'Cancel',pwWrong:'Wrong password, try again',pwPriv:'The password and the file stay in your browser. Nothing is sent anywhere.',pwBusy:'Decrypting…',
@@ -326,7 +338,8 @@ const t=(k,v)=>{ let s=(I18N[lang][k]!==undefined?I18N[lang][k]:I18N['zh-CN'][k]
 const isMac=/Mac|iPhone|iPad/.test(navigator.platform);
 function applyLang(){
   document.documentElement.lang=lang;
-  $('#q').placeholder=t('search'); $('#qkbd').textContent=isMac?'⌘K':'Ctrl K';
+  $('#q').placeholder=t('search'); $('#q').setAttribute('aria-label',t('search')); $('#qkbd').textContent=isMac?'⌘K':'Ctrl K';
+  $('#helpClose').setAttribute('aria-label',t('close')); $('#dClose').setAttribute('aria-label',t('close')); $('#pwInput').setAttribute('aria-label',t('pwPlaceholder'));
   $('#viewSeg [data-v=map]').textContent=t('map'); $('#viewSeg [data-v=outline]').textContent=t('outline');
   $('#levelBtn span').textContent=t('level'); $('#exportBtn span').textContent=t('export'); $('#exportBtn').title=t('export');
   $('#moreBtn').title=t('more'); $('#btnOpen span').textContent=t('open'); $('#btnOpen').title=t('open');
@@ -360,7 +373,7 @@ function buildMenus(){
   if(installEvt){ const ib=document.createElement('button'); ib.textContent=t('install'); ib.onclick=()=>{ closeMenus(); promptInstall(); }; mp.appendChild(ib); }
   const sm=document.createElement('button'); sm.className='only-sm'; sm.textContent=state.mode==='map'?t('outline'):t('map'); sm.onclick=()=>{ setMode(state.mode==='map'?'outline':'map'); closeMenus(); }; mp.appendChild(sm);
   const lb=document.createElement('button'); lb.textContent=t('lang'); lb.onclick=()=>{ lang=lang==='zh-CN'?'en':'zh-CN'; try{ localStorage.setItem('ml.lang',lang); }catch(e){} applyLang(); closeMenus(); }; mp.appendChild(lb);
-  const hb=document.createElement('button'); hb.textContent=t('help'); hb.onclick=()=>{ closeMenus(); $('#help').classList.add('show'); }; mp.appendChild(hb);
+  const hb=document.createElement('button'); hb.textContent=t('help'); hb.onclick=()=>{ closeMenus(); openHelp(); }; mp.appendChild(hb);
 }
 function closeMenus(){ document.querySelectorAll('.menu.open').forEach(m=>m.classList.remove('open')); }
 document.querySelectorAll('.menu > .ib').forEach(b=>b.addEventListener('click',e=>{ e.stopPropagation(); const m=b.parentElement; const was=m.classList.contains('open'); closeMenus(); if(!was) m.classList.add('open'); }));
@@ -384,11 +397,11 @@ async function readZip(buf){
   }
   async function bytes(n){
     const f=files[n], q=f.lho;
-    if(dv.getUint32(q,true)!==0x04034b50) throw new Error('zip entry broken: '+n);
+    if(dv.getUint32(q,true)!==0x04034b50) throw new Error(t('errZipEntry',{n}));
     const start=q+30+dv.getUint16(q+26,true)+dv.getUint16(q+28,true);
     const data=u8.subarray(start,start+f.csize);
     if(f.method===0) return data;
-    if(f.method!==8) throw new Error('unsupported zip method '+f.method);
+    if(f.method!==8) throw new Error(t('errZipMethod',{m:f.method}));
     if(typeof DecompressionStream==='undefined') throw new Error(t('errOldBrowser'));
     const resp=new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw')));
     return new Uint8Array(await resp.arrayBuffer());
@@ -474,7 +487,7 @@ function topicFromXml(el,floating){
 }
 function fromXml(text){
   const doc=new DOMParser().parseFromString(text,'application/xml');
-  if(doc.getElementsByTagName('parsererror').length) throw new Error('content.xml parse error');
+  if(doc.getElementsByTagName('parsererror').length) throw new Error(t('errXml'));
   const sheets=[...doc.documentElement.children].filter(e=>e.localName==='sheet');
   return sheets.map((s,i)=>{
     const title=[...s.children].find(e=>e.localName==='title');
@@ -512,10 +525,15 @@ async function decryptBytes(data,e,password){
   const key=await crypto.subtle.importKey('raw',bits,{name:'AES-CBC'},false,['decrypt']);
   return new Uint8Array(await crypto.subtle.decrypt({name:'AES-CBC',iv:e.iv},key,data));
 }
+const busyEl=$('#busy');
+function setBusy(on){ busyEl.textContent=on?t('parsing'):''; busyEl.classList.toggle('show',!!on); }
+const nextPaint=()=>new Promise(r=>requestAnimationFrame(()=>setTimeout(r,0)));
+/* 显示“正在解析”并让出一帧，保证提示先画出来再开始同步重活 */
+async function withBusy(fn){ setBusy(true); await nextPaint(); try{ return await fn(); } finally{ setBusy(false); } }
 let pwResolve=null;
 function askPassword(name,hint,wrong){
   return new Promise(res=>{
-    pwResolve=res; const box=$('#pw'); $('#pwFile').textContent=name||''; $('#pwHint').hidden=!hint; $('#pwHint').textContent=hint?t('pwHint',{h:hint}):''; $('#pwErr').textContent=wrong?t('pwWrong'):''; $('#pwInput').value=''; $('#pwOk').disabled=false; $('#pwOk').textContent=t('pwOpen');
+    pwResolve=res; setBusy(false); const box=$('#pw'); $('#pwFile').textContent=name||''; $('#pwHint').hidden=!hint; $('#pwHint').textContent=hint?t('pwHint',{h:hint}):''; $('#pwErr').textContent=wrong?t('pwWrong'):''; $('#pwInput').value=''; $('#pwOk').disabled=false; $('#pwOk').textContent=t('pwOpen');
     box.classList.add('show'); setTimeout(()=>$('#pwInput').focus(),50);
   });
 }
@@ -538,7 +556,7 @@ async function loadBuffer(buf,name){
       try{ text=new TextDecoder('utf-8').decode(await decryptBytes(raw,enc.entries[main],password)); sheets=parse(text); break; }
       catch(e){ if(e&&e.message&&/errOldCrypto|errNoCrypto|XMind 3\.7|pre-3\.7|HTTPS/.test(e.message)){ closePw(); throw e; } wrong=true; }
     }
-    closePw();
+    closePw(); setBusy(true); await nextPaint();
   } else { text=await zip.text(main); sheets=parse(text); }
   const res={};
   for(const r of resourceNames(text)){ if(zip.has(r)){ try{ let b=await zip.bytes(r); if(enc&&enc.entries[r]&&password!==null) b=await decryptBytes(b,enc.entries[r],password); res[r]=await toDataUrl(b,r); }catch(e){} } }
@@ -546,7 +564,7 @@ async function loadBuffer(buf,name){
 }
 async function loadFile(file){
   errEl.textContent='';
-  try{ await loadBuffer(await file.arrayBuffer(),file.name); }
+  try{ await withBusy(async()=>loadBuffer(await file.arrayBuffer(),file.name)); }
   catch(e){ errEl.textContent=t('errFail')+(e.message||e); emptyEl.classList.remove('hidden'); }
 }
 
@@ -613,7 +631,7 @@ function buildNode(n,depth,color){
     const tg=document.createElement('button');
     const pos=n.layout==='down'?'b':n.layout==='up'?'t':(n.layout==='left'||n.layout==='treeLeft')?'l':'r';
     tg.className='tg '+pos;
-    tg.textContent=n.collapsed?String(countAll(n)-1):'−';
+    tg.textContent=n.collapsed?String(countAll(n)-1):'−'; tg.setAttribute('aria-label',n.collapsed?t('expand'):t('collapse')); tg.setAttribute('aria-expanded',String(!n.collapsed));
     tg.onclick=e=>{ e.stopPropagation(); n.collapsed=!n.collapsed; render(false); };
     el.appendChild(tg);
   }
@@ -815,9 +833,12 @@ window.addEventListener('resize',()=>{ if(state.sheets.length&&state.mode==='map
 $('#focusBack').onclick=exitFocus;
 function showDetail(n){ $('#dTitle').textContent=n.title; const d=$('#dNotes'); d.innerHTML=''; if(n.notesEl){ const c=n.notesEl.cloneNode(true); c.querySelectorAll('img[data-res]').forEach(im=>{ const r=state.res[im.dataset.res]; if(r) im.src=r.src; else im.remove(); }); d.appendChild(c); d.classList.add('rich'); } else { d.textContent=n.notes; d.classList.remove('rich'); } $('#detail').classList.add('show'); }
 $('#dClose').onclick=()=>$('#detail').classList.remove('show');
-$('#helpBtn').onclick=()=>$('#help').classList.add('show');
-$('#helpClose').onclick=()=>$('#help').classList.remove('show');
-$('#help').addEventListener('click',e=>{ if(e.target===$('#help')) $('#help').classList.remove('show'); });
+let helpReturnFocus=null;
+function openHelp(){ helpReturnFocus=document.activeElement; $('#help').classList.add('show'); $('#helpClose').focus(); }
+function closeHelp(){ $('#help').classList.remove('show'); if(helpReturnFocus&&helpReturnFocus.focus) helpReturnFocus.focus(); helpReturnFocus=null; }
+$('#helpBtn').onclick=openHelp;
+$('#helpClose').onclick=closeHelp;
+$('#help').addEventListener('click',e=>{ if(e.target===$('#help')) closeHelp(); });
 document.querySelectorAll('#viewSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.v));
 function setMode(m){
   state.mode=m; document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('active',b.dataset.v===m));
@@ -830,12 +851,12 @@ $('#coachOk').onclick=()=>{ $('#coach').classList.remove('show'); try{ localStor
 document.addEventListener('keydown',e=>{
   const inInput=!!(e.target&&e.target.matches&&e.target.matches('input,textarea,select'));
   if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){ e.preventDefault(); qEl.focus(); qEl.select(); return; }
-  if(e.key==='Escape'){ if($('#help').classList.contains('show')) return $('#help').classList.remove('show'); if(document.querySelector('.menu.open')) return closeMenus(); if($('#detail').classList.contains('show')) return $('#detail').classList.remove('show'); if(state.q) return clearSearch(true); if(state.sel) return select(null); if(state.focus) return exitFocus(); return; }
+  if(e.key==='Escape'){ if($('#pw').classList.contains('show')) return $('#pwCancel').click(); if($('#help').classList.contains('show')) return closeHelp(); if(document.querySelector('.menu.open')) return closeMenus(); if($('#detail').classList.contains('show')) return $('#detail').classList.remove('show'); if(state.q) return clearSearch(true); if(state.sel) return select(null); if(state.focus) return exitFocus(); return; }
   if(inInput||e.metaKey||e.ctrlKey||e.altKey) return;
   if(!state.sheets.length) return;
   switch(e.key){
     case '/': e.preventDefault(); qEl.focus(); break;
-    case '?': $('#help').classList.toggle('show'); break;
+    case '?': if($('#help').classList.contains('show')) closeHelp(); else openHelp(); break;
     case '+': case '=': zoomAt(1.2,stage.clientWidth/2,stage.clientHeight/2); break;
     case '-': case '_': zoomAt(1/1.2,stage.clientWidth/2,stage.clientHeight/2); break;
     case '0': case 'f': case 'F': fitView(); break;
@@ -943,11 +964,11 @@ window.Mindlook={open:loadBuffer,exportImage,toMarkdown,setMode,setLevel,search:
 applyTheme(); applyLang();
 if(window.XMIND_FILE){
   const f=window.XMIND_FILE; const u=b64(f.b64); delete window.XMIND_FILE;
-  loadBuffer(u.buffer,f.name).catch(e=>{ errEl.textContent=t('errFail')+(e.message||e); emptyEl.classList.remove('hidden'); });
+  withBusy(()=>loadBuffer(u.buffer,f.name)).catch(e=>{ errEl.textContent=t('errFail')+(e.message||e); emptyEl.classList.remove('hidden'); });
 }
 if(window.XMIND_DATA){
   const d=window.XMIND_DATA;
-  prepareRes(d.resources||{}).then(res=>setData(d.format==='xml'?fromXml(d.content):fromJson(d.content),d.name,res))
+  withBusy(async()=>setData(d.format==='xml'?fromXml(d.content):fromJson(d.content),d.name,await prepareRes(d.resources||{})))
     .catch(e=>{ errEl.textContent=t('errFail')+(e.message||e); });
 }
 })();

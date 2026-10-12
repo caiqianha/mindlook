@@ -1,0 +1,25 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python syntax
+        run: python3 -m py_compile xmindview.py
+      - name: Shell syntax
+        run: bash -n xmindview
+      - name: CLI renders the bundled sample
+        run: |
+          out="$(mktemp -d)/sample.html"
+          ./xmindview --no-open -o "$out" samples/sample.xmind
+          test -s "$out" && grep -q 'window.XMIND_DATA=' "$out"
+      - name: Manifest is valid JSON
+        run: python3 -c "import json;json.load(open('manifest.webmanifest'))"
+      - name: No network references in app files
+        # The only URLs allowed in the app are W3C namespace identifiers (SVG / XHTML / XLink); they are never fetched.
+        run: |
+          if grep -noE "https?://[^\"' <)]+" index.html sw.js | grep -vE "^[^:]+:[0-9]+:https?://www\.w3\.org/(2000/svg|1999/(xhtml|xlink))$"; then
+            echo "unexpected URL in app files"; exit 1
+          fi
+          ! grep -nE "<(script|link)[^>]+(src|href)=[\"']https?:" index.html
