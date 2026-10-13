@@ -9,11 +9,23 @@ jobs:
         run: python3 -m py_compile xmindview.py
       - name: Shell syntax
         run: bash -n xmindview
-      - name: CLI renders the bundled sample
+      - name: CLI renders every bundled sample (.xmind, .mm, .opml, .md, .txt)
         run: |
-          out="$(mktemp -d)/sample.html"
-          ./xmindview --no-open -o "$out" samples/sample.xmind
-          test -s "$out" && grep -q 'window.XMIND_DATA=' "$out"
+          dir="$(mktemp -d)"
+          for f in samples/sample.xmind samples/sample.mm samples/sample.opml samples/sample.md samples/sample.txt; do
+            out="$dir/$(basename "$f").html"
+            ./xmindview --no-open -o "$out" "$f"
+            test -s "$out" && grep -q 'window.XMIND_DATA=' "$out" || { echo "render failed: $f"; exit 1; }
+          done
+      - name: Samples are well-formed (XML parses, text is UTF-8)
+        run: |
+          python3 - <<'PY'
+          import xml.dom.minidom, pathlib
+          for f in ("samples/sample.mm", "samples/sample.opml"):
+              xml.dom.minidom.parse(f)
+          for f in ("samples/sample.md", "samples/sample.txt"):
+              pathlib.Path(f).read_text(encoding="utf-8")
+          PY
       - name: Manifest is valid JSON
         run: python3 -c "import json;json.load(open('manifest.webmanifest'))"
       - name: No network references in app files

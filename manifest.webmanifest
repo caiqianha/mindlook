@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Mindlook",
   "short_name": "Mindlook",
-  "description": "View .xmind mind maps in your browser. Nothing is uploaded.",
+  "description": "Mind map viewer for .xmind, FreeMind .mm, OPML and Markdown files. Parsed in your browser, nothing is uploaded.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -16,7 +16,11 @@
     { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "file_handlers": [
-    { "action": "./", "accept": { "application/vnd.xmind.workbook": [".xmind"] } }
+    { "action": "./", "accept": { "application/vnd.xmind.workbook": [".xmind"] } },
+    { "action": "./", "accept": { "application/x-freemind": [".mm"] } },
+    { "action": "./", "accept": { "text/x-opml": [".opml"] } },
+    { "action": "./", "accept": { "text/markdown": [".md", ".markdown"] } },
+    { "action": "./", "accept": { "text/plain": [".txt"] } }
   ],
   "launch_handler": { "client_mode": "focus-existing" }
 }

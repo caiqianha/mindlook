@@ -1,0 +1,15 @@
+旅行清单 Packing list
+	证件 Documents
+		护照 passport
+		身份证 ID card
+		打印的行程 printed itinerary
+	衣物 Clothes
+		外套 jacket
+		运动鞋 sneakers
+	电子 Electronics
+		充电器 chargers
+		转换插头 travel adapter
+		降噪耳机 noise-cancelling headphones
+	出发前 Before leaving
+		关窗 close the windows
+		给植物浇水 water the plants

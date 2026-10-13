@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""xmindview: 把 .xmind 文件转成网页并在浏览器中打开。
+"""xmindview: 把思维导图文件转成网页并在浏览器中打开。
+
+支持 .xmind（XMind 2020+ / XMind 8，含密码保护）、FreeMind / Freeplane .mm、OPML、
+Markdown（.md）和缩进文本大纲（.txt）。非 .xmind 的文件原样内嵌，由页面里的解析器处理。
 
 用法:
   xmindview 文件.xmind [更多文件...]
-  xmindview --no-open 文件.xmind   # 只生成 HTML，打印路径，不打开浏览器
-  xmindview -o 输出.html 文件.xmind  # 指定输出位置
+  xmindview --no-open 文件.mm      # 只生成 HTML，打印路径，不打开浏览器
+  xmindview -o 输出.html 文件.md    # 指定输出位置
 """
 import argparse
 import base64
@@ -34,9 +37,25 @@ def is_encrypted(zf, names):
     return False
 
 
+def read_source_text(path: Path) -> str:
+    """非 .xmind 的文本格式：按 UTF-8 读取（去 BOM），失败时退回 GB18030，再退回替换非法字节。"""
+    raw = path.read_bytes()
+    for enc in ("utf-8-sig", "gb18030"):
+        try:
+            return raw.decode(enc)
+        except UnicodeDecodeError:
+            pass
+    return raw.decode("utf-8", errors="replace")
+
+
 def extract(path: Path):
-    """返回 (format, content, resources)。format 为 'json'（XMind 2020+）或 'xml'（XMind 8）。
+    """返回 (format, content, resources)。
+    format 为 'json'（XMind 2020+）、'xml'（XMind 8）、'file'（密码保护，整个文件内嵌）
+    或 'source'（.mm / .opml / .md / .txt 等文本格式，原文内嵌，由页面识别并解析）。
     resources 是 {zip内路径: data URI}，只包含正文引用到的图片。"""
+    if path.suffix.lower() != ".xmind" and not zipfile.is_zipfile(path):
+        # .mm / .opml / .md / .txt 或无扩展名的文本：原文内嵌，页面按扩展名和内容识别
+        return "source", read_source_text(path), {}
     try:
         zf = zipfile.ZipFile(path)
     except zipfile.BadZipFile:
@@ -90,7 +109,7 @@ def open_in_browser(html_path: Path):
 def main(argv):
     parser = argparse.ArgumentParser(
         prog="xmindview", description=__doc__.strip(), formatter_class=argparse.RawDescriptionHelpFormatter, add_help=True)
-    parser.add_argument("files", nargs="*", metavar="文件.xmind", help="要查看的 .xmind 文件（可多个）")
+    parser.add_argument("files", nargs="*", metavar="文件", help="要查看的文件（.xmind / .mm / .opml / .md / .txt，可多个）")
     parser.add_argument("--no-open", action="store_true", help="只生成 HTML，打印路径，不打开浏览器")
     parser.add_argument("-o", "--output", metavar="输出.html", help="指定输出位置（只能配合单个文件）")
     if not argv[1:]:
@@ -100,7 +119,7 @@ def main(argv):
     files = [Path(a).expanduser() for a in args.files]
     out_path = Path(args.output).expanduser() if args.output else None
     if not files:
-        parser.error("请提供 .xmind 文件路径")
+        parser.error("请提供文件路径（.xmind / .mm / .opml / .md / .txt）")
     if out_path and len(files) > 1:
         parser.error("-o 只能配合单个文件使用")
 

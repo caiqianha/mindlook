@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic OPML sample for Mindlook. 合成示例，仅用于演示。 -->
+<opml version="2.0">
+  <head>
+    <title>读书笔记 Reading notes</title>
+    <dateCreated>Tue, 13 Oct 2026 09:00:00 +0800</dateCreated>
+  </head>
+  <body>
+    <outline text="《深度工作》Deep Work" _note="合成的读书笔记示例。&#10;Synthetic reading notes; nothing here is a real quote.">
+      <outline text="核心主张 Core claim">
+        <outline text="专注是稀缺技能 focus is a scarce skill"/>
+        <outline text="浅层工作会挤占深度时间 shallow work crowds out depth" _note="例如：会议、即时消息、邮件。"/>
+      </outline>
+      <outline text="四种节奏 Four rhythms">
+        <outline text="禁欲式 monastic"/>
+        <outline text="双峰式 bimodal"/>
+        <outline text="节奏式 rhythmic" _status="checked"/>
+        <outline text="记者式 journalistic"/>
+      </outline>
+      <outline text="行动清单 Action items">
+        <outline text="每天上午 9–11 点不开消息 9–11 am no messaging" _status="checked"/>
+        <outline text="周五复盘 weekly review on Friday"/>
+        <outline text="参考资料 reference" url="https://example.invalid/deep-work"/>
+      </outline>
+    </outline>
+  </body>
+</opml>
