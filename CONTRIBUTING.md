@@ -6,3 +6,5 @@
 - 新增文案请同时补中英文（`I18N` 对象）。
 
 The viewer is a single `index.html` with no build step. Keep it dependency-free (no CDN scripts, no font requests). Test with `samples/sample.xmind` plus real files from both XMind 2020+ and XMind 8 before opening a PR, and add both Chinese and English strings for any new UI text.
+
+By participating you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
